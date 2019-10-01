@@ -127,21 +127,25 @@ int main() {
             std::cout<<"lane 0 s data: "<<cars_ln0[j].s<<std::endl;
           }*/
           double fusion_max_s = 0;
-          //std::cout<<"Main car is in lane number: "<<lane<<std::endl;
+          std::cout<<"Main car is in lane number: "<<lane<<std::endl;
+          std::cout<<"Sensor size: "<<sensor_fusion.size()<<std::endl;
           for(int i=0; i<sensor_fusion.size();i++)
           {
-           	double d = sensor_fusion[i][6];
+            
+           	/*double d = sensor_fusion[i][6];
             if (fusion_max_s < sensor_fusion[i][5]){
               fusion_max_s = sensor_fusion[i][5];
-            }
+            }*/
             
             double vx;
             double vy;
             double check_speed;
             double check_car_s;
+            double d = sensor_fusion[i][6];
             
             if(d <(2+4*lane+2) && d > (2+4*lane-2))
-            {
+            { std::cout<<std::endl;
+              std::cout<<"Car ahead."<<std::endl;
               vx = sensor_fusion[i][3];
               vy = sensor_fusion[i][4];
               check_speed = sqrt(vx*vx+vy*vy);
@@ -153,6 +157,7 @@ int main() {
               {
                 
                 too_close = true;
+                KL = false;
                 KL_Cost = exp(-(abs(check_car_s-car_s)));
                 FSM state;
                 state.id = sensor_fusion[i][0];
@@ -167,7 +172,8 @@ int main() {
                   
                                
               //costs.insert(1,KL_Cost);
-            }  
+            }
+            
             /*else{
               FSM state;
               state.cost = -99;
@@ -189,13 +195,13 @@ int main() {
                 check_car_s1 = sensor_fusion[i][5];
                 check_car_s1_1 = sensor_fusion[i][5];
               
-                //check_car_s1 +=((double)prev_size*0.02*check_speed1);
-                check_car_s1_1 +=((double)prev_size*0.02*check_speed1);
+                check_car_s1 +=((double)prev_size*0.02*check_speed1);
+                //check_car_s1_1 +=((double)prev_size*0.02*check_speed1);
                 //double delta_s1 = ((double)prev_size*0.02*check_speed1)
                // std::cout<<"fusion id: "<<sensor_fusion[i][0]<<" d_left_lane: "<<d_left_lane<<" car_d: "<<car_d<<", check_car_s1: "<<check_car_s1<<", car_s: "<<car_s<<", check_speed1: "<< check_speed1<<", car_speed: "                           <<car_speed<<std::endl;     
-               if(abs(check_car_s1 - car_s) <  10 && lane == 2) //(car_s-30) > check_car_s1 || 
-               {
-                                  
+               if(abs(check_car_s1 - car_s) < 10 && lane == 2) //(car_s-30) > check_car_s1 || 
+               {  std::cout<<std::endl;
+                  std::cout<<"Car To the Left Side of lane #"<<lane<<std::endl;                
                   CLL_Cost = exp(-abs((check_car_s1-fusion_max_s)));
                   FSM state;
                   state.id = sensor_fusion[i][0];               
@@ -207,6 +213,8 @@ int main() {
                   CLR = false;
                 }
               	else if( abs(check_car_s1 - car_s) <  10 && lane == 1){
+                  std::cout<<std::endl;
+                  std::cout<<"Car To the Left Side of lane #"<<lane<<std::endl;
                   CLL = false;
                   left_lane = true;
                   CLL_Cost = exp(-abs((check_car_s1-fusion_max_s)));
@@ -218,14 +226,17 @@ int main() {
                   states.push_back(state); 
                 }
                 else{
+                  std::cout<<std::endl;
+                  std::cout<<"No Car To the Left Side of lane #"<<lane<<std::endl;
                   CLL = true;
+                  CLR = false;
                 }
               
                 //CLL_Cost = 1 - exp(-(1/abs(check_car_s1-car_s)));
                                         
                // costs.insert(pair<int, double>(2,CLR_Cost));
             }
-                
+            
                 
             double d_right_lane = sensor_fusion[i][6];
             double vx2;
@@ -242,11 +253,13 @@ int main() {
                 check_car_s2_1 = sensor_fusion[i][5];
 
                 //std::cout<<"fusion id: "<<sensor_fusion[i][0]<<" d_right_lane: "<<d_right_lane<<" car_d: "<<car_d<<", check_car_s2: "<<check_car_s2<<", car_s: "<<car_s<<", check_speed2: "<< check_speed2<<", car_speed: "<<car_speed<<std::endl;
-                //check_car_s2 +=((double)prev_size*0.02*check_speed2);
-                check_car_s2_1 +=((double)prev_size*0.02*check_speed2);
+                check_car_s2 +=((double)prev_size*0.02*check_speed2);
+                //check_car_s2_1 +=((double)prev_size*0.02*check_speed2);
                       //(check_car_s2 - car_s)>5
                 if(abs(check_car_s2 - car_s) <  10 && lane == 1)//(car_s-30) > check_car_s2 || 
                 {
+                   std::cout<<std::endl;
+                   std::cout<<"Car To the Right Side of lane #"<<lane<<std::endl;   
                    right_lane = true;
                    CLR = false;
                    CLR_Cost = exp(-(abs(check_car_s2-car_s)));
@@ -259,6 +272,8 @@ int main() {
                 }
                 else if( abs(check_car_s2 - car_s) < 10 && lane == 0)
                 {
+                   std::cout<<std::endl;
+                   std::cout<<"Car To the right Side of lane #"<<lane<<std::endl;   
                    right_lane = true;
                    CLR = false;
                    CLL = false;
@@ -271,33 +286,45 @@ int main() {
                    states.push_back(state);   
                 }
                 else{
+                  std::cout<<std::endl;
+                  std::cout<<"No Car To the right Side of lane #"<<lane<<std::endl;   
                   CLL = false;
                   CLR = true;
                 }
                 //CLR_Cost = 1 - exp(-(1/abs(check_car_s2-car_s)));                  
                 //costs.insert(3,CLL_Cost);
-                
+               
              }
-            
-            if((check_car_s > car_s) && (check_car_s-car_s) < 30 && (check_car_s1 > car_s) && (check_car_s1-car_s) < 30 && (check_car_s2_1 > car_s) && (check_car_s2_1-car_s) < 30)
+           
+             std::cout<<std::endl;
+             std::cout<<"check_car_s: "<<check_car_s<<" - car_s: "<<car_s<<" = "<<check_car_s-car_s<<std::endl;
+             std::cout<<"check_car_s1: "<<check_car_s1<<" - car_s: "<<car_s<<" = "<<check_car_s1-car_s<<std::endl;
+             std::cout<<"check_car_s2: "<<check_car_s2<<" - car_s: "<<car_s<<" = "<<check_car_s2-car_s<<std::endl;
+             std::cout<<"In Sensor_Fusion loop KL is: "<<KL<<" CLL is: "<<CLL<<" CLR is: "<<CLR<<std::endl;
+            /*if((check_car_s > car_s) && (check_car_s-car_s) < 30 && (check_car_s1 > car_s) && (check_car_s1-car_s) < 30 && (check_car_s2 > car_s) && (check_car_s2-car_s) < 30)
             {  
-              too_close = false;
+              too_close = true;
+              KL = true;
               CLL = true;
               CLR = true;
             }
-            else if((check_car_s > car_s) && (check_car_s-car_s) < 30 && (check_car_s1_1 > car_s) && (check_car_s1_1-car_s) < 30 && (lane == 1 || lane == 2))
+            else if((check_car_s > car_s) && (check_car_s-car_s) < 30 && (check_car_s1 > car_s) && (check_car_s1-car_s) < 30 && (lane == 1 || lane == 2))
             {
               too_close = true;
+              KL = false;
               CLL = true;
               CLR = false;
             }
-            else if((check_car_s > car_s) && (check_car_s-car_s) < 30 && (check_car_s2_1 > car_s) && (check_car_s2_1-car_s) < 30 && (lane == 1 || lane == 0))
+            else if((check_car_s > car_s) && (check_car_s-car_s) < 30 && (check_car_s2 > car_s) && (check_car_s2-car_s) < 30 && (lane == 1 || lane == 0))
             {
               too_close = true;
+              KL = false;
               CLL = false;
               CLR = true;
-            }
+            }*/
           }
+          std::cout<<std::endl;
+          std::cout<<"----------------------------end loop--------------------------------"<<std::endl;
          /* double lowest_cost = 100.0;
           int final_state;
           
@@ -315,14 +342,13 @@ int main() {
             final_state = 0;*/
           
           //std::cout<<"Final State is "<<final_state<<std::endl;
-          
-          std::cout<<"KL is: "<<KL<<" CLL is: "<<CLL<<" CLR is: "<<CLR<<std::endl;
+          std::cout<<std::endl;
+          std::cout<<"Final result of, KL is: "<<KL<<" CLL is: "<<CLL<<" CLR is: "<<CLR<<std::endl;
           
          // states.clear();                  
                              
           if(too_close)
           {      
-              KL = false;
              
               if ((KL == true && CLL == true && CLR == true) || (KL == false && CLL == false && CLR == false) ){ //|| (KL == true && CLL == true && CLR == true)
                 lane = lane;
@@ -436,7 +462,7 @@ int main() {
           
           double x_add_on = 0;
           
-          for(int i=0; i <= 50-previous_path_x.size(); i++)
+          for(int i=1; i <= 50-previous_path_x.size(); i++)
           {
             double N = (target_dist/(0.02*ref_vel/2.24));
             double x_point = x_add_on+(target_x)/N;
